@@ -1,0 +1,55 @@
+<table mat-table [dataSource]="dataSource()" matSort (matSortChange)="sortData($event)"
+       class="mat-elevation-z8">
+
+  <ng-container matColumnDef="fileName">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by fileName">
+      Файл
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.fileName}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="registrationCode">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by registrationCode">
+      Рег. №
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.registrationCode}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="registrationDate">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by registrationDate">
+      Дата рег.
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.registrationDate | date}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="documentCode">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by documentCode">
+      № исх. док-та
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.documentCode}} </td>
+  </ng-container>
+
+    <ng-container matColumnDef="dateToSend">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by dateToSend">
+      Дата исх. док-та
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.dateToSend | date}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="correspondentType">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by correspondentType">
+      Корреспондент
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.correspondentType}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="topic">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by topic">
+      Тема
+    </th>
+    <td mat-cell *matCellDef="let element"> {{element.topic}} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

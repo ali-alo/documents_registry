@@ -11,6 +11,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { DocumentsService } from '../services/documents.service';
+import { DELIVERY_TYPES } from '../enums/delivery.enum';
+import { CORRESPONDENT_TYPES } from '../enums/correspondent.enum';
 
 @Component({
   selector: 'app-form',
@@ -33,6 +36,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 export class FormComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly documentsService = inject(DocumentsService);
 
   private readonly atLeastOneDigitRegEx =
     /([0-9]+)|([A-Яa-я]+[^A-Яa-я0-9]+)|([^A-Яa-я0-9]+[A-Яa-я]+)/;
@@ -40,17 +44,8 @@ export class FormComponent {
     this.atLeastOneDigitRegEx
   );
 
-  readonly deliveryTypes = [
-    { name: 'Курьер', code: 0 },
-    { name: 'Email', code: 1 },
-    { name: 'Телефонограмма', code: 2 },
-  ];
-
-  readonly correspondentTypes = [
-    { name: 'ЦБ', code: 0 },
-    { name: 'ГНИ', code: 1 },
-    { name: 'ТСЖ', code: 2 },
-  ];
+  readonly deliveryTypes = DELIVERY_TYPES;
+  readonly correspondentTypes = CORRESPONDENT_TYPES;
 
   currentDate = new Date();
   oneWeekLaterDate = new Date(
@@ -59,6 +54,7 @@ export class FormComponent {
 
   form = this.formBuilder.group({
     registrationCode: ['', [Validators.required, this.regexValidator]],
+    dateToSend: [this.currentDate],
     registrationDate: { value: this.currentDate, disabled: true },
     documentCode: ['', [Validators.required, this.regexValidator]],
     deliveryType: '',
@@ -128,9 +124,11 @@ export class FormComponent {
   }
 
   saveForm(): void {
-    if (!this.validateForm())
-      return;
+    if (!this.validateForm()) return;
     // send request to the back-end here
+    const payload = this.form.getRawValue();
+    console.log('payload is', payload);
+    this.documentsService.addDocument(payload);
   }
 
   private validateForm(): boolean {

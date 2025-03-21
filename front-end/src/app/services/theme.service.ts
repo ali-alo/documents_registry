@@ -10,7 +10,8 @@ export class ThemeService {
   private readonly PREFERRED_THEME_STORAGE_KEY = 'preferred-theme';
 
   private readonly document = inject(DOCUMENT);
-  private readonly currentTheme = signal<Theme>('light');
+  private readonly _currentTheme = signal<Theme>('light');
+  currentTheme = this._currentTheme.asReadonly();
 
   constructor() {
     const theme = this.getThemeFromLocalStorage();
@@ -18,12 +19,12 @@ export class ThemeService {
   }
 
   toggleTheme(): void {
-    const newTheme: Theme = this.currentTheme() === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = this._currentTheme() === 'light' ? 'dark' : 'light';
     this.setTheme(newTheme);
   }
 
   private setTheme(theme: Theme): void {
-    this.currentTheme.set(theme);
+    this._currentTheme.set(theme);
     this.setThemeInLocalStorage(theme);
     theme === 'dark'
       ? this.document.documentElement.classList.add('dark-mode')

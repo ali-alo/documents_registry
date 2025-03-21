@@ -4,7 +4,7 @@
     <h3 class="my-2! text-base">Регистрация документа</h3>
     <mat-divider></mat-divider>
 
-    <div class="flex flex-col gap-6 mt-4">
+    <div class="flex flex-col gap-8 mt-4">
       <div class="grid grid-cols-2 gap-4">
         <mat-form-field>
           <mat-label>Дата рег.</mat-label>
@@ -19,6 +19,22 @@
           ></mat-datepicker-toggle>
           <mat-datepicker #registrationDate></mat-datepicker>
           <mat-hint>Автоматическое значение</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Дата исх. док-та</mat-label>
+          <input
+            matInput
+            formControlName="dateToSend"
+            [min]="currentDate"
+            [matDatepicker]="dateToSend"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="dateToSend"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dateToSend></mat-datepicker>
+          <mat-hint>Дата когда документ должен быть передан корреспонденту</mat-hint>
         </mat-form-field>
       </div>
 
@@ -73,7 +89,7 @@
     <h3 class="my-2 text-base">Информация о документе</h3>
     <mat-divider></mat-divider>
 
-    <div class="flex flex-col gap-6 mt-4">
+    <div class="flex flex-col gap-8 mt-4">
       <mat-form-field class="w-full">
         <mat-label>Тема документа</mat-label>
         <input matInput formControlName="topic" [maxlength]="100" />

@@ -1,4 +1,5 @@
 @use "@angular/material" as mat;
+@use "tailwindcss";
 
 html {
   color-scheme: light;
@@ -30,4 +31,8 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-mdc-form-field-required-marker {
+  color: red;
 }

@@ -1,0 +1,138 @@
+<div class="h-full flex flex-col">
+  <div matDialogTitle>Новый документ</div>
+  <form matDialogContent [formGroup]="form">
+    <h3 class="my-2! text-base">Регистрация документа</h3>
+    <mat-divider></mat-divider>
+
+    <div class="flex flex-col gap-6 mt-4">
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field>
+          <mat-label>Дата рег.</mat-label>
+          <input
+            matInput
+            formControlName="registrationDate"
+            [matDatepicker]="registrationDate"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="registrationDate"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #registrationDate></mat-datepicker>
+          <mat-hint>Автоматическое значение</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>№ исх. док-та</mat-label>
+          <input matInput formControlName="documentCode" />
+          @if (form.controls['documentCode'].hasError('pattern')) {
+          <mat-error
+            >Номер не может состоять только из букв или специальных
+            символов.</mat-error
+          >
+          }
+          <mat-hint>Номер исходного документа</mat-hint>
+        </mat-form-field>
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>Рег. №</mat-label>
+          <input matInput formControlName="registrationCode"/>
+          <mat-hint>Регистрационный номер</mat-hint>
+          @if (form.controls['registrationCode'].hasError('pattern')) {
+          <mat-error
+            >Номер не может состоять только из букв или специальных символов.
+          </mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field>
+          <mat-label>Форма доставки</mat-label>
+          <mat-select matNativeControl formControlName="deliveryType">
+            @for (delivery of deliveryTypes; track delivery.code) {
+            <mat-option [value]="delivery.code">{{ delivery.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Корреспондент</mat-label>
+          <mat-select matNativeControl formControlName="correspondentType">
+            @for (correspondent of correspondentTypes; track correspondent.code)
+            {
+            <mat-option [value]="correspondent.code">{{
+              correspondent.name
+            }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <h3 class="my-2 text-base">Информация о документе</h3>
+    <mat-divider></mat-divider>
+
+    <div class="flex flex-col gap-6 mt-4">
+      <mat-form-field class="w-full">
+        <mat-label>Тема документа</mat-label>
+        <input matInput formControlName="topic" [maxlength]="100" />
+        <mat-hint>Не более 100 символов</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="w-full">
+        <mat-label>Описание документа</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          [maxlength]="1000"
+        ></textarea>
+        <mat-hint>Не более 1000 символов</mat-hint>
+      </mat-form-field>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field>
+          <mat-label>Срок исполнения</mat-label>
+          <input
+            matInput
+            [min]="currentDate"
+            [matDatepicker]="deadline"
+            formControlName="deadline"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="deadline"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #deadline></mat-datepicker>
+          <mat-hint>Выберите дату выполнения</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="flex gap-6">
+        <mat-slide-toggle formControlName="isAvailable"
+          >Доступ</mat-slide-toggle
+        >
+        <mat-slide-toggle formControlName="isControlled"
+          >Контроль</mat-slide-toggle
+        >
+      </div>
+
+      <div
+        class="h-20 flex justify-center items-center relative border-dashed border-2 mb-2"
+      >
+        <p class="absolute px-4">{{ fileUploadText() }}</p>
+        <input
+          type="file"
+          class="opacity-0 h-full w-full cursor-pointer"
+          accept=".pdf,.doc,.docx"
+          (change)="onSelectedFileChange($event)"
+        />
+      </div>
+    </div>
+  </form>
+
+  <div matDialogActions class="mt-auto">
+    <button mat-button matDialogClose>Закрыть</button>
+    <button mat-button cdkFocusInitial (click)="saveForm()">Сохранить</button>
+  </div>
+</div>

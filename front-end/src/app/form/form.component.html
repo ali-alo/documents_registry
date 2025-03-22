@@ -58,6 +58,8 @@
           <mat-error
             >Номер не может состоять только из букв или специальных символов.
           </mat-error>
+          } @else if (form.controls['registrationCode'].hasError('notUnique')) {
+            <mat-error>{{ registrationCodeIsUnique() }}</mat-error>
           }
         </mat-form-field>
       </div>

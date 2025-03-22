@@ -60,4 +60,14 @@ public class DocumentsRepository : IDocumentsRepository
             }
         ).OrderBy(document => document.RegistrationCode).ToListAsync();
     }
+
+    public async Task<bool> CheckFileNameIsUnique(string fileName)
+    {
+        return !await _context.Documents.AnyAsync(document => document.FileName == fileName);
+    }
+
+    public async Task<bool> CheckRegistrationCodeIsUnique(string code)
+    {
+        return !await _context.Documents.AnyAsync(document => document.RegistrationCode == code);
+    }
 }

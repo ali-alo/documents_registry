@@ -7,4 +7,6 @@ public interface IDocumentsRepository
 {
     Task<Response> AddDocument(DocumentCreateRequest payload);
     Task<IEnumerable<DocumentGridItem>> GetAllDocuments();
+    Task<bool> CheckRegistrationCodeIsUnique(string code);
+    Task<bool> CheckFileNameIsUnique(string fileName);
 }

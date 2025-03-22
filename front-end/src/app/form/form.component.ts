@@ -1,5 +1,9 @@
 import { Component, computed, inject, ViewEncapsulation } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
@@ -14,6 +18,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DocumentsService } from '../services/documents.service';
 import { DocumentForm } from '../models/document-form.model';
 import { CORRESPONDENT_TYPES, DELIVERY_TYPES } from '../models/custom-types';
+import { debounceTime, filter, map, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -71,6 +76,27 @@ export class FormComponent {
     initialValue: null,
   });
 
+  private readonly registrationCodeControl =
+    this.form.controls['registrationCode'];
+  
+  registrationCodeIsUnique = toSignal(
+    this.registrationCodeControl.valueChanges.pipe(
+      debounceTime(2500),
+      filter(() => this.registrationCodeControl.valid),
+      switchMap((registrationCode) =>
+        this.documentsService.checkRegistrationCodeIsUnique(registrationCode)
+      ),
+      tap((isUnique) =>
+        this.registrationCodeControl.setErrors(
+          isUnique ? null : { notUnique: true }
+        )
+      ),
+      map((isUnique) =>
+        isUnique ? '' : 'В базе данных уже имеется данный номер.'
+      )
+    )
+  );
+
   fileUploadText = computed(() => {
     const file = this.fileControlValue();
     if (file) return file.name;
@@ -81,9 +107,22 @@ export class FormComponent {
     const inputElement = event.target as HTMLInputElement;
     const newFile = inputElement.files?.[0];
     if (!newFile) return; // if user didn't upload a file, return early
-    !this.validateUploadedFile(newFile)
-      ? this.setFileValue(null) // file didn't pass validation, discard it
-      : this.setFileValue(newFile); // save valid file and later send it to back-end
+    if (!this.validateUploadedFile(newFile)) {
+      this.setFileValue(null); // file didn't pass validation, discard it
+      return;
+    }
+    // check file name is unique and save it or discard it
+    this.documentsService
+      .checkFileNameIsUnique(newFile.name.toLocaleLowerCase())
+      .subscribe((isUnique) => {
+        if (isUnique) this.setFileValue(newFile);
+        else {
+          this.setFileValue(null);
+          this.showSnackBarMessage(
+            'Файл с данным названием уже имеется в реестре.'
+          );
+        }
+      });
   }
 
   private validateUploadedFile(file: File): boolean {
@@ -125,10 +164,15 @@ export class FormComponent {
 
   saveForm(): void {
     if (!this.validateForm()) return;
-    // send request to the back-end here
     const payload = this.form.getRawValue() as DocumentForm;
-    console.log('payload is', payload);
-    this.documentsService.addDocument(payload).subscribe(result => console.log(result));
+    this.documentsService
+      .addDocument(payload)
+      .subscribe((result) => {
+        if (result.errorCode) {
+          this.showSnackBarMessage("Что-то пошло не так с сохранением. Пожалуйста, попробуйте снова.")
+          return;
+        }
+      });
   }
 
   private validateForm(): boolean {

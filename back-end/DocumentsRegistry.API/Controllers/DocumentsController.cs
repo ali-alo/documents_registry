@@ -30,4 +30,16 @@ public class DocumentsController : ControllerBase
     {
         return await _repository.GetAllDocuments();
     }
+
+    [HttpGet("check-registration-code/{code}")]
+    public async Task<bool> CheckRegistrationCodeIsUnique(string code)
+    {
+        return await _repository.CheckRegistrationCodeIsUnique(code);
+    }
+
+    [HttpGet("check-file-name/{fileName}")]
+    public async Task<bool> CheckFileNameIsUnique(string fileName)
+    {
+        return await _repository.CheckFileNameIsUnique(fileName);
+    }
 }

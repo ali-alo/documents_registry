@@ -11,11 +11,13 @@ namespace DocumentsRegistry.API.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IDocumentsRepository _repository;
+    private readonly IBlobStorageRepository _blobRepository;
     private readonly ILogger<DocumentsController> _logger;
 
-    public DocumentsController(IDocumentsRepository repository, ILogger<DocumentsController> logger)
+    public DocumentsController(IDocumentsRepository repository, IBlobStorageRepository blobRepository, ILogger<DocumentsController> logger)
     {
         _repository = repository;
+        _blobRepository = blobRepository;
         _logger = logger;
     }
 
@@ -57,5 +59,11 @@ public class DocumentsController : ControllerBase
     public async Task<Response> UpdateDocument(string registrationCode, [FromBody] DocumentUpdateRequest request)
     {
         return await _repository.UpdateDocument(registrationCode, request);
+    }
+
+    [HttpGet("get-file/{fileName}")]
+    public async Task<FileStreamResult> GetFileUrl(string fileName)
+    {
+        return await _blobRepository.GetFileStreamAsync(fileName);
     }
 }

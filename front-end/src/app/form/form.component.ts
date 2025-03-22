@@ -12,7 +12,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -51,6 +51,7 @@ export class FormComponent implements OnInit {
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly documentsService = inject(DocumentsService);
+  private readonly dialog = inject(MatDialog);
   private readonly dialogData = inject(MAT_DIALOG_DATA);
 
   private readonly atLeastOneDigitRegEx =
@@ -132,6 +133,10 @@ export class FormComponent implements OnInit {
         this.form.controls['registrationCode'].disable();
         this.uploadedFileName.set(details.fileName);
       });
+  }
+
+  showFile(): void {
+    this.documentsService.showFile(this.uploadedFileName());
   }
 
   onSelectedFileChange(event: Event): void {
@@ -238,6 +243,7 @@ export class FormComponent implements OnInit {
         : 'Документ был успешно добавлен';
       this.showSnackBarMessage(message);
       this.documentsService.loadGridData$.next(true);
+      this.dialog.closeAll();
     }
   };
 }

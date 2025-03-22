@@ -16,11 +16,11 @@ export class DocumentsService {
   private httpClient = inject(HttpClient);
   private _documents = signal<any>([]);
   private baseUrl = 'http://localhost:5119/api/documents';
+  private fileObjectUrl: string | null = null;
 
   documents = this._documents.asReadonly();
 
   loadGridData$ = new BehaviorSubject(true);
-
 
   addDocument(document: DocumentCreateForm): Observable<Result> {
     const formData = new FormData();
@@ -40,7 +40,9 @@ export class DocumentsService {
   }
 
   getAllDocuments(): Observable<DocumentGridItem[]> {
-    return this.loadGridData$.pipe(switchMap(() => this.httpClient.get<DocumentGridItem[]>(this.baseUrl)));
+    return this.loadGridData$.pipe(
+      switchMap(() => this.httpClient.get<DocumentGridItem[]>(this.baseUrl))
+    );
   }
 
   checkRegistrationCodeIsUnique(code: string): Observable<boolean> {
@@ -69,5 +71,34 @@ export class DocumentsService {
       `${this.baseUrl}/${registrationCode}`,
       updates
     );
+  }
+
+  showFile(fileName: string): void {
+    this.getFileUrl(fileName).subscribe((blob) => {
+      if (this.fileObjectUrl) {
+        URL.revokeObjectURL(this.fileObjectUrl);
+      }
+
+      this.fileObjectUrl = URL.createObjectURL(blob);
+
+      // browsers can display PDF files, show them directly there
+      // if is not a pdf file, allow users to install them
+      fileName.toLowerCase().endsWith('.pdf')
+        ? window.open(this.fileObjectUrl, '_blank')
+        : this.downloadFile(fileName);
+    });
+  }
+
+  private getFileUrl(fileName: string) {
+    return this.httpClient.get(`${this.baseUrl}/get-file/${fileName}`, {
+      responseType: 'blob',
+    });
+  }
+
+  private downloadFile(fileName: string): void {
+    const link = document.createElement('a');
+    link.href = this.fileObjectUrl ?? '';
+    link.download = fileName;
+    link.click();
   }
 }

@@ -47,4 +47,8 @@ export class TableComponent {
       data: registrationCode,
     });
   }
+
+  showFile(fileName: string): void {
+    this.documentsService.showFile(fileName);
+  }
 }

@@ -5,7 +5,9 @@
     <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by fileName">
       Файл
     </th>
-    <td mat-cell *matCellDef="let element"> {{element.fileName}} </td>
+    <td mat-cell *matCellDef="let element">
+      <a class="cursor-pointer text-blue-500" (click)="showFile(element.fileName)">{{element.fileName}}</a>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="registrationCode">

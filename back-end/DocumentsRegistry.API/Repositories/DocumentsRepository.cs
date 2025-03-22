@@ -9,10 +9,12 @@ namespace DocumentsRegistry.API.Repositories;
 public class DocumentsRepository : IDocumentsRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly IBlobStorageRepository _blobStorage;
 
-    public DocumentsRepository(ApplicationDbContext context)
+    public DocumentsRepository(ApplicationDbContext context, IBlobStorageRepository blobStorage)
     {
         _context = context;
+        _blobStorage = blobStorage;
     }
 
     public async Task<Response> AddDocument(DocumentCreateRequest payload)
@@ -36,6 +38,7 @@ public class DocumentsRepository : IDocumentsRepository
         {
             await _context.Documents.AddAsync(documentEntity);
             await _context.SaveChangesAsync();
+            await _blobStorage.UploadToBlobContainerAsync(payload.File);
         }
         catch (Exception ex)
         {

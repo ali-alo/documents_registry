@@ -40,9 +40,7 @@ export class DocumentsService {
   }
 
   getAllDocuments(): Observable<DocumentGridItem[]> {
-    return this.loadGridData$.pipe(
-      switchMap(() => this.httpClient.get<DocumentGridItem[]>(this.baseUrl))
-    );
+    return this.httpClient.get<DocumentGridItem[]>(this.baseUrl);
   }
 
   checkRegistrationCodeIsUnique(code: string): Observable<boolean> {

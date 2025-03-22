@@ -8,6 +8,12 @@ export interface DocumentGridItem {
   topic: string;
 }
 
+// reuse everything except correspondentType property, then redefine it as string
+export interface DocumentGridItemDisplay
+  extends Omit<DocumentGridItem, 'correspondentType'> {
+  correspondentType: string;
+}
+
 export interface DocumentDetails extends DocumentGridItem {
   deliveryType: number;
   description: string;

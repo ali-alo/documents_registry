@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="dataSource()" matSort (matSortChange)="sortData($event)"
+<table mat-table [dataSource]="(dataSource$ | async) ?? []" matSort (matSortChange)="sortData($event)"
        class="mat-elevation-z8">
 
   <ng-container matColumnDef="fileName">

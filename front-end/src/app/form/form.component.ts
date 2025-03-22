@@ -1,5 +1,5 @@
 import { Component, computed, inject, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
@@ -12,8 +12,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DocumentsService } from '../services/documents.service';
-import { DELIVERY_TYPES } from '../enums/delivery.enum';
-import { CORRESPONDENT_TYPES } from '../enums/correspondent.enum';
+import { DocumentForm } from '../models/document-form.model';
+import { CORRESPONDENT_TYPES, DELIVERY_TYPES } from '../models/custom-types';
 
 @Component({
   selector: 'app-form',
@@ -34,7 +34,7 @@ import { CORRESPONDENT_TYPES } from '../enums/correspondent.enum';
   encapsulation: ViewEncapsulation.None,
 })
 export class FormComponent {
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly documentsService = inject(DocumentsService);
 
@@ -57,8 +57,8 @@ export class FormComponent {
     dateToSend: [this.currentDate],
     registrationDate: { value: this.currentDate, disabled: true },
     documentCode: ['', [Validators.required, this.regexValidator]],
-    deliveryType: '',
-    correspondentType: ['', Validators.required],
+    deliveryType: 0,
+    correspondentType: [0, Validators.required],
     topic: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', Validators.maxLength(1000)],
     deadline: [this.oneWeekLaterDate], // by default one week later
@@ -126,9 +126,9 @@ export class FormComponent {
   saveForm(): void {
     if (!this.validateForm()) return;
     // send request to the back-end here
-    const payload = this.form.getRawValue();
+    const payload = this.form.getRawValue() as DocumentForm;
     console.log('payload is', payload);
-    this.documentsService.addDocument(payload);
+    this.documentsService.addDocument(payload).subscribe(result => console.log(result));
   }
 
   private validateForm(): boolean {

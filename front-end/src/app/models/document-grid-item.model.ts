@@ -1,11 +1,9 @@
-import { CorrespondentType } from "../enums/correspondent.enum";
-
-export interface DocumentForm {
+export interface DocumentGridItem {
   fileName: string;
   registrationCode: string;
   registrationDate: Date;
   documentCode: string;
   dateToSend: Date;
-  correspondentType: CorrespondentType;
+  correspondentType: 0 | 1 | 2;
   topic: string;
 }

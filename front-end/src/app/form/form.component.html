@@ -1,5 +1,5 @@
 <div class="h-full flex flex-col">
-  <div matDialogTitle>Новый документ</div>
+  <div matDialogTitle>{{isFormForUpdate() ? 'Изменение документа' : 'Новый документ' }}</div>
   <form matDialogContent [formGroup]="form">
     <h3 class="my-2! text-base">Регистрация документа</h3>
     <mat-divider></mat-divider>
@@ -34,7 +34,9 @@
             [for]="dateToSend"
           ></mat-datepicker-toggle>
           <mat-datepicker #dateToSend></mat-datepicker>
-          <mat-hint>Дата когда документ должен быть передан корреспонденту</mat-hint>
+          <mat-hint
+            >Дата когда документ должен быть передан корреспонденту</mat-hint
+          >
         </mat-form-field>
       </div>
 
@@ -52,14 +54,14 @@
         </mat-form-field>
         <mat-form-field subscriptSizing="dynamic">
           <mat-label>Рег. №</mat-label>
-          <input matInput formControlName="registrationCode"/>
+          <input matInput formControlName="registrationCode" />
           <mat-hint>Регистрационный номер</mat-hint>
           @if (form.controls['registrationCode'].hasError('pattern')) {
           <mat-error
             >Номер не может состоять только из букв или специальных символов.
           </mat-error>
           } @else if (form.controls['registrationCode'].hasError('notUnique')) {
-            <mat-error>{{ registrationCodeIsUnique() }}</mat-error>
+          <mat-error>{{ registrationCodeIsUnique() }}</mat-error>
           }
         </mat-form-field>
       </div>
@@ -135,6 +137,10 @@
         >
       </div>
 
+      @if (isFormForUpdate()) {
+        <a>{{ uploadedFileName() }}</a>
+       } @else {
+
       <div
         class="h-20 flex justify-center items-center relative border-dashed border-2 mb-2"
       >
@@ -146,6 +152,7 @@
           (change)="onSelectedFileChange($event)"
         />
       </div>
+      }
     </div>
   </form>
 

@@ -1,10 +1,10 @@
-export interface DocumentForm {
+export interface DocumentCreateForm {
   registrationCode: string;
   registrationDate: Date;
   documentCode: string;
   dateToSend: Date;
-  deliveryType: 0 | 1 | 2;
-  correspondentType: 0 | 1 | 2;
+  deliveryType: number;
+  correspondentType: number;
   topic: string;
   description: string;
   deadline: Date;

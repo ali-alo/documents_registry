@@ -70,4 +70,30 @@ public class DocumentsRepository : IDocumentsRepository
     {
         return !await _context.Documents.AnyAsync(document => document.RegistrationCode == code);
     }
+
+    public async Task<DocumentEntity?> GetDetailsByRegistrationCode(string registrationCode)
+    {
+        return await _context.Documents.FindAsync(registrationCode);
+    }
+
+    public async Task<Response> UpdateDocument(string registrationCode, DocumentUpdateRequest payload)
+    {
+        var document = await GetDetailsByRegistrationCode(registrationCode);
+        if (document is null)
+        {
+            return new Response { ErrorCode = 1, ErrorMessage = $"Couldn't find document with registrationCode: {registrationCode}" };
+        }
+        document.DateToSend = payload.DateToSend;
+        document.DocumentCode = payload.DocumentCode;
+        document.DeliveryType = payload.DeliveryType;
+        document.CorrespondentType = payload.CorrespondentType;
+        document.Topic = payload.Topic;
+        document.Description = payload.Description;
+        document.Deadline = payload.Deadline;
+        document.IsAvailable = payload.IsAvailable;
+        document.IsControlled = payload.IsControlled;
+        _context.Update(document);
+        await _context.SaveChangesAsync();
+        return new Response();
+    }
 }

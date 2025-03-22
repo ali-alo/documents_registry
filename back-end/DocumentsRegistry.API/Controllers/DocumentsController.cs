@@ -1,4 +1,5 @@
-﻿using DocumentsRegistry.API.Models.Requests;
+﻿using DocumentsRegistry.API.Models.Entities;
+using DocumentsRegistry.API.Models.Requests;
 using DocumentsRegistry.API.Models.Responses;
 using DocumentsRegistry.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -41,5 +42,20 @@ public class DocumentsController : ControllerBase
     public async Task<bool> CheckFileNameIsUnique(string fileName)
     {
         return await _repository.CheckFileNameIsUnique(fileName);
+    }
+
+    [HttpGet("{registrationCode}")]
+    public async Task<ActionResult<DocumentEntity>> GetDetailsByRegistrationCode(string registrationCode)
+    {
+        var document = await _repository.GetDetailsByRegistrationCode(registrationCode);
+        if (document is null)
+            return NotFound();
+        return document;
+    }
+
+    [HttpPut("{registrationCode}")]
+    public async Task<Response> UpdateDocument(string registrationCode, [FromBody] DocumentUpdateRequest request)
+    {
+        return await _repository.UpdateDocument(registrationCode, request);
     }
 }

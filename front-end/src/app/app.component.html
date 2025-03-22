@@ -1,16 +1,11 @@
-<div class="container mx-auto h-full mt-4">
+<div class="container mx-auto h-full pt-4">
   <button mat-icon-button (click)="toggleTheme()">
     @if (useDarkTheme()) {
-      <mat-icon>light_mode</mat-icon>
+    <mat-icon>light_mode</mat-icon>
     } @else {
-      <mat-icon>dark_mode</mat-icon>
+    <mat-icon>dark_mode</mat-icon>
     }
   </button>
-  <div class="mt-12">
-    <button mat-stroked-button class="float-right" (click)="openForm()">
-      <mat-icon>add</mat-icon>
-      Добавить документ
-    </button>
-    <app-table class="my-auto" />
-  </div>
+  <app-grid-controls />
+  <app-table />
 </div>

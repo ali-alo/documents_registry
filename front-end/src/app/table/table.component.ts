@@ -5,6 +5,8 @@ import { DocumentsService } from '../services/documents.service';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { map } from 'rxjs';
 import { getCorrespondentTypeName } from '../models/custom-types';
+import { MatDialog } from '@angular/material/dialog';
+import { FormComponent } from '../form/form.component';
 
 @Component({
   selector: 'app-table',
@@ -14,17 +16,16 @@ import { getCorrespondentTypeName } from '../models/custom-types';
 })
 export class TableComponent {
   private readonly documentsService = inject(DocumentsService);
+  private readonly dialog = inject(MatDialog);
 
-  dataSource$ = this.documentsService
-    .getAllDocuments()
-    .pipe(
-      map((docs) =>
-        docs.map((doc) => ({
-          ...doc,
-          correspondentType: getCorrespondentTypeName(doc.correspondentType),
-        }))
-      )
-    );
+  dataSource$ = this.documentsService.getAllDocuments().pipe(
+    map((docs) =>
+      docs.map((doc) => ({
+        ...doc,
+        correspondentType: getCorrespondentTypeName(doc.correspondentType),
+      }))
+    )
+  );
 
   displayedColumns = [
     'fileName',
@@ -38,5 +39,12 @@ export class TableComponent {
 
   sortData(data: Sort): void {
     console.log(data);
+  }
+
+  onDoubleClick(registrationCode: string): void {
+    this.dialog.open(FormComponent, {
+      height: '70vh',
+      data: registrationCode,
+    });
   }
 }

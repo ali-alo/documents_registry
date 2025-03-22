@@ -1,9 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { DocumentForm } from '../models/document-form.model';
-import { Observable } from 'rxjs';
+import { DocumentCreateForm } from '../models/document-create-form.model';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import { Result } from '../models/result.model';
-import { DocumentGridItem } from '../models/document-grid-item.model';
+import {
+  DocumentDetails,
+  DocumentGridItem,
+} from '../models/document-grid-item.model';
+import { DocumentUpdateForm } from '../models/document-update-form.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +19,10 @@ export class DocumentsService {
 
   documents = this._documents.asReadonly();
 
-  addDocument(document: DocumentForm): Observable<Result> {
+  loadGridData$ = new BehaviorSubject(true);
+
+
+  addDocument(document: DocumentCreateForm): Observable<Result> {
     const formData = new FormData();
     formData.append('registrationCode', document.registrationCode);
     formData.append('dateToSend', document.dateToSend.toUTCString());
@@ -33,7 +40,7 @@ export class DocumentsService {
   }
 
   getAllDocuments(): Observable<DocumentGridItem[]> {
-    return this.httpClient.get<DocumentGridItem[]>(this.baseUrl);
+    return this.loadGridData$.pipe(switchMap(() => this.httpClient.get<DocumentGridItem[]>(this.baseUrl)));
   }
 
   checkRegistrationCodeIsUnique(code: string): Observable<boolean> {
@@ -45,6 +52,22 @@ export class DocumentsService {
   checkFileNameIsUnique(fileName: string): Observable<boolean> {
     return this.httpClient.get<boolean>(
       `${this.baseUrl}/check-file-name/${fileName}`
+    );
+  }
+
+  getDocumentDetails(registrationCode: string): Observable<DocumentDetails> {
+    return this.httpClient.get<DocumentDetails>(
+      `${this.baseUrl}/${registrationCode}`
+    );
+  }
+
+  updateDocument(
+    registrationCode: string,
+    updates: DocumentUpdateForm
+  ): Observable<Result> {
+    return this.httpClient.put<Result>(
+      `${this.baseUrl}/${registrationCode}`,
+      updates
     );
   }
 }

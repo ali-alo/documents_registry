@@ -4,6 +4,14 @@ export interface DocumentGridItem {
   registrationDate: Date;
   documentCode: string;
   dateToSend: Date;
-  correspondentType: 0 | 1 | 2;
+  correspondentType: number;
   topic: string;
+}
+
+export interface DocumentDetails extends DocumentGridItem {
+  deliveryType: number;
+  description: string;
+  deadline: Date;
+  isAvailable: boolean;
+  isControlled: boolean;
 }

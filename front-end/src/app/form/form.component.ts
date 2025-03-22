@@ -1,11 +1,18 @@
-import { Component, computed, inject, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -16,9 +23,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DocumentsService } from '../services/documents.service';
-import { DocumentForm } from '../models/document-form.model';
+import { DocumentCreateForm } from '../models/document-create-form.model';
 import { CORRESPONDENT_TYPES, DELIVERY_TYPES } from '../models/custom-types';
 import { debounceTime, filter, map, switchMap, tap } from 'rxjs';
+import { Result } from '../models/result.model';
+import { DocumentUpdateForm } from '../models/document-update-form.model';
 
 @Component({
   selector: 'app-form',
@@ -38,10 +47,11 @@ import { debounceTime, filter, map, switchMap, tap } from 'rxjs';
   styleUrl: './form.component.scss',
   encapsulation: ViewEncapsulation.None,
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly documentsService = inject(DocumentsService);
+  private readonly dialogData = inject(MAT_DIALOG_DATA);
 
   private readonly atLeastOneDigitRegEx =
     /([0-9]+)|([A-Яa-я]+[^A-Яa-я0-9]+)|([^A-Яa-я0-9]+[A-Яa-я]+)/;
@@ -51,6 +61,9 @@ export class FormComponent {
 
   readonly deliveryTypes = DELIVERY_TYPES;
   readonly correspondentTypes = CORRESPONDENT_TYPES;
+
+  isFormForUpdate = signal(false);
+  uploadedFileName = signal('');
 
   currentDate = new Date();
   oneWeekLaterDate = new Date(
@@ -63,7 +76,7 @@ export class FormComponent {
     registrationDate: { value: this.currentDate, disabled: true },
     documentCode: ['', [Validators.required, this.regexValidator]],
     deliveryType: 0,
-    correspondentType: [0, Validators.required],
+    correspondentType: [0, [Validators.required, Validators.min(1)]],
     topic: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', Validators.maxLength(1000)],
     deadline: [this.oneWeekLaterDate], // by default one week later
@@ -78,10 +91,10 @@ export class FormComponent {
 
   private readonly registrationCodeControl =
     this.form.controls['registrationCode'];
-  
+
   registrationCodeIsUnique = toSignal(
     this.registrationCodeControl.valueChanges.pipe(
-      debounceTime(2500),
+      debounceTime(1500),
       filter(() => this.registrationCodeControl.valid),
       switchMap((registrationCode) =>
         this.documentsService.checkRegistrationCodeIsUnique(registrationCode)
@@ -102,6 +115,24 @@ export class FormComponent {
     if (file) return file.name;
     return 'Выберите или перетащите файл формата PDF, DOC, или DOCX';
   });
+
+  ngOnInit(): void {
+    if (this.dialogData)
+      // form was open for update, get additional details from the server and update form
+      this.setFormForUpdate();
+  }
+
+  setFormForUpdate(): void {
+    this.isFormForUpdate.set(true);
+    const registrationCode: string = this.dialogData;
+    this.documentsService
+      .getDocumentDetails(registrationCode)
+      .subscribe((details) => {
+        this.form.patchValue(details);
+        this.form.controls['registrationCode'].disable();
+        this.uploadedFileName.set(details.fileName);
+      });
+  }
 
   onSelectedFileChange(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
@@ -164,15 +195,19 @@ export class FormComponent {
 
   saveForm(): void {
     if (!this.validateForm()) return;
-    const payload = this.form.getRawValue() as DocumentForm;
-    this.documentsService
-      .addDocument(payload)
-      .subscribe((result) => {
-        if (result.errorCode) {
-          this.showSnackBarMessage("Что-то пошло не так с сохранением. Пожалуйста, попробуйте снова.")
-          return;
-        }
-      });
+    const payload = this.form.getRawValue() as DocumentCreateForm;
+
+    if (this.isFormForUpdate()) {
+      this.documentsService
+        .updateDocument(payload.registrationCode, payload)
+        .subscribe(this.handleBackendResult);
+    } else {
+      // new document must have a file uploaded
+      if (!this.validateFileUpload()) return;
+      this.documentsService
+        .addDocument(payload)
+        .subscribe(this.handleBackendResult);
+    }
   }
 
   private validateForm(): boolean {
@@ -181,10 +216,28 @@ export class FormComponent {
       this.showSnackBarMessage('Заполните выделенные поля!');
       return false;
     }
+    return true;
+  }
+
+  private validateFileUpload(): boolean {
     if (!this.fileControlValue()) {
       this.showSnackBarMessage('Необходимо загрузить файл.');
       return false;
     }
     return true;
   }
+
+  private handleBackendResult = (result: Result) => {
+    if (result.errorCode) {
+      this.showSnackBarMessage(
+        'Что-то пошло не так с сохранением. Пожалуйста, попробуйте снова.'
+      );
+    } else {
+      const message = this.isFormForUpdate()
+        ? 'Изменения сохранены'
+        : 'Документ был успешно добавлен';
+      this.showSnackBarMessage(message);
+      this.documentsService.loadGridData$.next(true);
+    }
+  };
 }

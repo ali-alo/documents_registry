@@ -13,7 +13,11 @@ builder.Services.AddOpenApi();
 builder.Services.Configure<BlobStorageOptions>(builder.Configuration.GetSection("BlobStorage"));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"), options =>
+    {
+        options.EnableRetryOnFailure();
+        options.CommandTimeout(50000);
+    }));
 
 builder.Services.AddScoped<IDocumentsRepository, DocumentsRepository>();
 builder.Services.AddScoped<IBlobStorageRepository, BlobStorageRepository>();

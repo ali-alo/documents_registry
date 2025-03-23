@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'front-end/**' # Trigger only if files in /front-end are changed
+      - '.github/workflows/azure-static-web-apps-ambitious-meadow-0c4257f00.yml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:

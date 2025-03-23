@@ -8,6 +8,7 @@ import {
   DocumentGridItem,
 } from '../models/document-grid-item.model';
 import { DocumentUpdateForm } from '../models/document-update-form.model';
+import { environment } from './../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import { DocumentUpdateForm } from '../models/document-update-form.model';
 export class DocumentsService {
   private httpClient = inject(HttpClient);
   private _documents = signal<any>([]);
-  private baseUrl = 'http://localhost:5119/api/documents';
+  private baseUrl = environment.apiurl;
   private fileObjectUrl: string | null = null;
 
   documents = this._documents.asReadonly();
